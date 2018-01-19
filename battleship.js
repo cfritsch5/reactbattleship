@@ -7,7 +7,7 @@ export const createBoard = function boardSetUp(name){
   return board;
 };
 
-function generateGrid(size = 2){
+function generateGrid(size = 8){
   let row,  grid = [];
   for(let i = 0 ; i < size ; i++){
     row = [];
@@ -19,7 +19,7 @@ function generateGrid(size = 2){
   return grid;
 }
 
-function generateShips(numShips = 1){
+function generateShips(numShips = 3){
   let ships = [];
   for(let i = 0; i < numShips; i++){
     ships.push({sunk: false, length:(2+i)});

@@ -18493,7 +18493,7 @@ var createBoard = exports.createBoard = function boardSetUp(name) {
 };
 
 function generateGrid() {
-  var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+  var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
 
   var row = void 0,
       grid = [];
@@ -18508,7 +18508,7 @@ function generateGrid() {
 }
 
 function generateShips() {
-  var numShips = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+  var numShips = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
 
   var ships = [];
   for (var i = 0; i < numShips; i++) {
