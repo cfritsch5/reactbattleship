@@ -1,0 +1,54 @@
+h1, h2, h3, h4, h5, h6 { text-align: center;}
+
+ul, li {
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+li {
+  width: 30px;
+  height: 30px;
+  border: 1px solid grey;
+  border-right: none;
+  border-bottom: none;
+  list-style-type: none;
+}
+
+li:last-child { border-right: 1px solid grey; }
+ul:last-child li { border-bottom: 1px solid grey; }
+.open { background: lightblue; }
+.hit { background: red; }
+
+.inactive .board {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.result {
+  position: absolute;
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  font-size: 3em;
+}
+
+.game { display: flex; justify-content: space-around;}
+.over { pointer-events: none;}
+
+.board {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.newgame {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  width: 200px;
+  height: 100px;
+  font-size: 2em;
+  z-index: 1;
+  margin-left: -100px; /*centers the element in relation to the left 50%*/
+}
