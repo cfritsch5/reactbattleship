@@ -70,7 +70,7 @@ class Game extends React.Component {
   playerClasses(toggle){
     let active = toggle ? 'active' : 'inactive';
     let result = toggle ? this.state.result : '';
-    if(this.state.gameOver)result = toggle? 'Won' : result;
+    if(this.state.gameOver)result = !toggle? 'Won' : result;
     return {active,result};
   }
 
