@@ -101,6 +101,7 @@ class Game extends React.Component {
 
     return(
       <div>
+        <h1>what</h1>
         <button onClick={()=>this.playDemoGame()}>Demo Game</button>
         {newGame}
         <h2>Player {(toggle ? '1' : '2') + '\'s'} turn</h2>
