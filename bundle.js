@@ -18439,11 +18439,6 @@ var Game = function (_React$Component) {
         'div',
         null,
         _react2.default.createElement(
-          'h1',
-          null,
-          'what'
-        ),
-        _react2.default.createElement(
           'button',
           { onClick: function onClick() {
               return _this4.playDemoGame();
