@@ -7,7 +7,7 @@ export const createBoard = function boardSetUp(name){
   return board;
 };
 
-function generateGrid(size = 8){
+export const generateGrid = function generateGrid(size = 6){
   let row,  grid = [];
   for(let i = 0 ; i < size ; i++){
     row = [];
@@ -17,7 +17,7 @@ function generateGrid(size = 8){
     grid.push(row);
   }
   return grid;
-}
+};
 
 function generateShips(numShips = 3){
   let ships = [];
@@ -67,6 +67,7 @@ function placeShip(grid,ship,position){
 
 //attack a space to play a turn
 export const attack = function torpedosAway(board, row, col){
+  console.log(board);
   let result, grid = board.grid, square = grid[row][col];
 
   switch (square) {

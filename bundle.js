@@ -18309,16 +18309,18 @@ var Game = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, props));
 
     _this.state = {
-      player1: (0, _battleship.createBoard)('bob'),
-      player2: (0, _battleship.createBoard)('notbob'),
+      player1: (0, _battleship.createBoard)('player1'),
+      player2: (0, _battleship.createBoard)('player2'),
       toggle: true,
       result: '',
       gameOver: false
     };
 
-    _this.attack = _this.attack.bind(_this);
+    _this.attackHere = _this.attackHere.bind(_this);
     _this.togglePlayers = _this.togglePlayers.bind(_this);
     _this.playDemoGame = _this.playDemoGame.bind(_this);
+    _this.currentPlayer = _this.currentPlayer.bind(_this);
+    _this.targetShip = _this.targetShip.bind(_this);
     return _this;
   }
 
@@ -18333,19 +18335,24 @@ var Game = function (_React$Component) {
       }, 500);
     }
   }, {
-    key: 'attack',
-    value: function attack(x, y) {
-      var current = this.state.toggle ? 'player2' : 'player1';
-      var updatedBoard = (0, _battleship.attack)(this.state[current], y, x);
-
+    key: 'currentPlayer',
+    value: function currentPlayer() {
+      return this.state.toggle ? this.state.player2 : this.state.player1;
+    }
+  }, {
+    key: 'attackHere',
+    value: function attackHere(row, col) {
+      console.log('atack player', this.currentPlayer());
+      var updatedBoard = (0, _battleship.attack)(this.currentPlayer(), row, col);
       this.setState({ result: updatedBoard.result });
 
       if (updatedBoard.result === 'Lost') {
         this.setState({ gameOver: true });
       } else {
-        this.setState(_defineProperty({}, current, updatedBoard));
+        this.setState(_defineProperty({}, this.currentPlayer().name, updatedBoard));
         this.togglePlayers();
       }
+      return updatedBoard.result;
     }
   }, {
     key: 'newGame',
@@ -18359,36 +18366,132 @@ var Game = function (_React$Component) {
       });
     }
   }, {
-    key: 'playDemoGame',
-    value: function playDemoGame(played) {
+    key: 'playDemoGameR',
+    value: function playDemoGameR() {
       var _this3 = this;
 
-      played = played || Array(10).fill(null, 0).map(function () {
-        return Array(10).fill(null, 0);
-      });
       var row = void 0,
           col = void 0;
 
-      do {
-        row = Math.floor(Math.random() * 10);
-        col = Math.floor(Math.random() * 10);
-      } while (played[row][col] !== null);
-
-      played[row][col] = 'x';
-      this.attack(row, col);
+      row = Math.floor(Math.random() * 6);
+      col = Math.floor(Math.random() * 6);
+      this.attackHere(row, col);
 
       if (!this.state.gameOver) {
         setTimeout(function () {
-          return _this3.playDemoGame(played);
-        }, 500);
+          return _this3.playDemoGameS();
+        }, 250);
       }
     }
+
+    /*
+    player1
+    - ships {1:length 2, active false, positions, tried}
+     if hit randomly activate ship
+    queue positions to try around hit
+    when hit again keep going in that direction until sunk or miss
+    - if not sunk go in other
+    ________
+      if hit positions
+      keep array of hit positions
+      if last was a hit check
+    */
+
+  }, {
+    key: 'playDemoGame',
+    value: function playDemoGame() {
+      var _this4 = this;
+
+      var row = void 0,
+          col = void 0,
+          value = void 0,
+          flag = true;
+      var i = 0;
+      while (flag && i < 100) {
+        i++;
+        // console.log('while');
+        row = Math.floor(Math.random() * 6);
+        col = Math.floor(Math.random() * 5);
+        col = row % 2 ? col - col % 2 : col - col % 2 + 1;
+        value = this.currentPlayer().grid[row][col];
+        // console.log(row,col,value,this.currentPlayer().grid);
+        if (value !== 2 && value !== 3) flag = false;
+      }
+      // console.log(this.attackHere(row,col));
+      // console.log(value,this.currentPlayer().grid[row][col]);
+      if (this.attackHere(row, col) === 'Hit') {
+        this.targetShip(row, col);
+      } else {
+        if (!this.state.gameOver) {
+          setTimeout(function () {
+            return _this4.playDemoGame();
+          }, 250);
+        }
+      }
+    }
+  }, {
+    key: 'targetShip',
+    value: function targetShip(row, col) {
+      var _this5 = this;
+
+      console.log('Targert');
+      var rowDelta = void 0,
+          colDelta = void 0,
+          direction = void 0,
+          value = void 0;
+      var grid = this.currentPlayer().grid;
+      var directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+      var i = 0;
+      var loopdy = function loopdy() {
+        setTimeout(function () {
+          console.log('loopsdt');
+          rowDelta = row + directions[i][0];
+          colDelta = col + directions[i][1];
+          value = grid[rowDelta][colDelta];
+
+          if (grid[row][col] && value !== 2 && value !== 3) {
+
+            console.log(_this5.currentPlayer().grid[row][col], row, col);
+            if (_this5.attackHere(rowDelta, colDelta) === 'Hit') {
+              direction = directions[i];
+              var sunkloop = function sunkloop() {
+                return setTimeout(function () {
+                  console.log('sunkl');
+                  if ((0, _battleship.attack)(rowDelta, colDelta) !== 'Sunk') {
+                    setTimeout(sunkloop, 250);
+                  }
+                }, 250);
+              };
+              sunkloop();
+            }
+          }
+          i++;
+          if (i < directions.length) {
+            loopdy();
+          }
+        }, 250);
+      };
+      loopdy();
+      // for(let i = 0; i < directions.length; i++){
+    }
+
+    // var i = 0;
+    // var a = ()=>{
+    //   setTimeout(()=>{
+    //     console.log(i);
+    //     i++;
+    //     if(i<3){
+    //       a();
+    //     }
+    //   },100);
+    // };
+
   }, {
     key: 'playerClasses',
     value: function playerClasses(toggle) {
       var active = toggle ? 'active' : 'inactive';
       var result = toggle ? this.state.result : '';
-      if (this.state.gameOver) result = !toggle ? 'Won' : result;
+      if (this.state.gameOver) result = !toggle ? 'Won' : this.currentPlayer().result;
       return { active: active, result: result };
     }
   }, {
@@ -18410,30 +18513,35 @@ var Game = function (_React$Component) {
             { className: 'result' },
             p1.result
           ),
-          _react2.default.createElement(_board2.default, { attack: this.attack, board: this.state['player' + num].grid })
+          _react2.default.createElement(_board2.default, { attack: this.attackHere, board: this.state['player' + num].grid })
         )
       );
     }
   }, {
-    key: 'render',
-    value: function render() {
-      var _this4 = this;
-
-      var toggle = this.state.toggle;
-      var p1 = this.playerClasses(!toggle);
-      var p2 = this.playerClasses(toggle);
-      var over = this.state.gameOver ? 'over' : '';
-      var newGame = void 0;
+    key: 'newGameButton',
+    value: function newGameButton() {
+      var _this6 = this;
 
       if (this.state.gameOver) {
-        newGame = _react2.default.createElement(
+        return _react2.default.createElement(
           'button',
           { className: 'newgame', onClick: function onClick() {
-              return _this4.newGame();
+              return _this6.newGame();
             } },
           'New Game?'
         );
       }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this7 = this;
+
+      // console.log(this.state.player1.result);
+      var toggle = this.state.toggle;
+      var p1 = this.playerClasses(!toggle);
+      var p2 = this.playerClasses(toggle);
+      var over = this.state.gameOver ? 'over' : '';
 
       return _react2.default.createElement(
         'div',
@@ -18441,11 +18549,11 @@ var Game = function (_React$Component) {
         _react2.default.createElement(
           'button',
           { onClick: function onClick() {
-              return _this4.playDemoGame();
+              return _this7.playDemoGame();
             } },
           'Demo Game'
         ),
-        newGame,
+        this.newGameButton(),
         _react2.default.createElement(
           'h2',
           null,
@@ -18487,8 +18595,8 @@ var createBoard = exports.createBoard = function boardSetUp(name) {
   return board;
 };
 
-function generateGrid() {
-  var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
+var generateGrid = exports.generateGrid = function generateGrid() {
+  var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 6;
 
   var row = void 0,
       grid = [];
@@ -18500,7 +18608,7 @@ function generateGrid() {
     grid.push(row);
   }
   return grid;
-}
+};
 
 function generateShips() {
   var numShips = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
@@ -18554,6 +18662,7 @@ function placeShip(grid, ship, position) {
 
 //attack a space to play a turn
 var attack = exports.attack = function torpedosAway(board, row, col) {
+  console.log(board);
   var result = void 0,
       grid = board.grid,
       square = grid[row][col];
@@ -18736,7 +18845,7 @@ var Square = function (_React$Component) {
       return _react2.default.createElement('li', {
         className: this.props.class,
         onClick: function onClick() {
-          return _this2.props.attack(_this2.props.x, _this2.props.y);
+          return _this2.props.attack(_this2.props.y, _this2.props.x);
         } });
     }
   }]);
