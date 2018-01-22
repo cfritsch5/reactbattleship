@@ -18428,17 +18428,21 @@ var Game = function (_React$Component) {
           this.placePlayer(game.player2)
         ),
         _react2.default.createElement(
-          'label',
-          null,
-          'Play Computer',
-          _react2.default.createElement('input', { type: 'checkbox', onClick: function onClick() {
-              return _this5.setState({ ai: !_this5.state.ai });
-            } })
-        ),
-        _react2.default.createElement(
-          'button',
-          { onClick: this.playDemo },
-          'Demo Game'
+          'div',
+          { 'class': 'options' },
+          _react2.default.createElement(
+            'label',
+            null,
+            _react2.default.createElement('input', { type: 'checkbox', onClick: function onClick() {
+                return _this5.setState({ ai: !_this5.state.ai });
+              } }),
+            'Play Computer'
+          ),
+          _react2.default.createElement(
+            'button',
+            { onClick: this.playDemo },
+            'Play Demo Game'
+          )
         )
       );
     }

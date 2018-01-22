@@ -94,11 +94,13 @@ class Game extends React.Component {
           {this.placePlayer(game.player1)}
           {this.placePlayer(game.player2)}
         </div>
-        <label>
-          Play Computer
-          <input type='checkbox' onClick={()=>this.setState({ai: !this.state.ai})}/>
-        </label>
-        <button onClick={this.playDemo}>Demo Game</button>
+        <div class='options'>
+          <label>
+            <input type='checkbox' onClick={()=>this.setState({ai: !this.state.ai})}/>
+            Play Computer
+          </label>
+          <button onClick={this.playDemo}>Play Demo Game</button>
+        </div>
       </div>
     );
   }
