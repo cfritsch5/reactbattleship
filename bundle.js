@@ -18307,12 +18307,15 @@ var Game = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, props));
 
     _this.state = {
-      game: (0, _battleship.startGame)(4, 2)
+      ai: false,
+      game: (0, _battleship.startGame)(6, 3)
     };
 
     _this.attack = _this.attack.bind(_this);
     _this.updateGrids = _this.updateGrids.bind(_this);
     _this.respond = _this.respond.bind(_this);
+    _this.playDemo = _this.playDemo.bind(_this);
+    _this.playComputer = _this.playComputer.bind(_this);
     return _this;
   }
 
@@ -18329,12 +18332,6 @@ var Game = function (_React$Component) {
         grid2: this.state.game.player2.grid
       });
     }
-
-    // playDemo(result){
-    //       result = this.state.game.turn();
-    //       this.respond(result);
-    // }
-
   }, {
     key: 'playDemo',
     value: function playDemo(result) {
@@ -18342,25 +18339,42 @@ var Game = function (_React$Component) {
 
       if (result !== 'Lost') {
         setTimeout(function () {
-          result = _this2.state.game.turn();
+          result = _this2.state.game.playDemo();
           _this2.respond(result);
           _this2.playDemo(result);
         }, 500);
       }
     }
   }, {
+    key: 'playComputer',
+    value: function playComputer() {
+      if (!this.state.over) {
+        if (this.state.game.currentPlayer === this.state.game.player2) {
+          var result = this.state.game.playDemo();
+          this.respond(result);
+        }
+      }
+      // console.log('comp',this.state.game.currentPlayer );
+      // console.log(this.state.game.currentPlayer === this.state.game.player2);
+    }
+  }, {
     key: 'attack',
     value: function attack(row, col) {
-      // console.log('atatcl');
+      var _this3 = this;
+
       var result = this.state.game.play(row, col);
       this.respond(result);
+      if (this.state.ai) {
+        setTimeout(function () {
+          return _this3.playComputer();
+        }, 500);
+      }
     }
   }, {
     key: 'respond',
     value: function respond(result) {
-      var _this3 = this;
+      var _this4 = this;
 
-      // console.log('result',result,this.state.game.currentPlayer.name);
       this.setState({ result: this.state.game.currentPlayer.result });
 
       if (result === 'Lost') {
@@ -18370,9 +18384,10 @@ var Game = function (_React$Component) {
         });
       } else {
         setTimeout(function () {
-          return _this3.setState({ result: '' });
+          return _this4.setState({ result: '' });
         }, 250);
       }
+
       this.updateGrids();
     }
   }, {
@@ -18393,11 +18408,11 @@ var Game = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
-      // console.log('gamestate',this.state);
       var game = this.state.game;
       var over = this.state.over;
+
       return _react2.default.createElement(
         'div',
         null,
@@ -18413,10 +18428,16 @@ var Game = function (_React$Component) {
           this.placePlayer(game.player2)
         ),
         _react2.default.createElement(
+          'label',
+          null,
+          'Play Computer',
+          _react2.default.createElement('input', { type: 'checkbox', onClick: function onClick() {
+              return _this5.setState({ ai: !_this5.state.ai });
+            } })
+        ),
+        _react2.default.createElement(
           'button',
-          { onClick: function onClick() {
-              return _this4.playDemo();
-            } },
+          { onClick: this.playDemo },
           'Demo Game'
         )
       );
@@ -18439,47 +18460,62 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 //Generate set up
-
-var startGame = exports.startGame = function game() {
+var startGame = exports.startGame = function startGame() {
   var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
   var numShips = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
   var player1 = createPlayer('player1', size, numShips);
   var player2 = createPlayer('player2', size, numShips);
+
+  //game Object closes over toggle & switch
   var toggle = true;
   var switchPlayers = function switchPlayers() {
     toggle = !toggle;
-    _game.currentPlayer = toggle ? player1 : player2;
+    game.currentPlayer = toggle ? player1 : player2;
   };
-  var _game = {
-    player1: player1, player2: player2,
+
+  //game object
+  var game = {
+    player1: player1,
+    player2: player2,
     currentPlayer: player1,
-    turn: function turn() {
+    playDemo: function playDemo() {
       switchPlayers();
-      if (_game.currentPlayer.mode.hunt) {
-        return hunt(_game.currentPlayer);
+      if (game.currentPlayer.mode.hunt) {
+        return hunt(game.currentPlayer);
       } else {
-        return target(_game.currentPlayer);
+        return target(game.currentPlayer);
       }
     },
     play: function play(row, col) {
       switchPlayers();
-      var result = attack(_game.currentPlayer, row, col);
+      var result = attack(game.currentPlayer, row, col);
       return result;
     }
   };
 
-  return _game;
+  return game;
 };
 
 var createPlayer = exports.createPlayer = function boardSetUp(name, size, numShips) {
-  var player = { name: name, result: null, sunk: 0 };
-  var blankgrid = generateGrid(size);
+  var player = {
+    name: name,
+    result: null,
+    sunk: 0,
+    mode: {
+      hunt: true,
+      target: {
+        queue: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        hits: []
+      }
+    },
+    opponentGrid: generateGrid(size),
+    opponentShips: generateShips(numShips)
+  };
+
   player.ships = generateShips(numShips);
-  player.grid = placeShips(blankgrid, player.ships);
-  player.opponentGrid = generateGrid(size);
-  player.opponentShips = generateShips(numShips);
-  player.mode = { hunt: true, target: { queue: [[1, 0], [0, 1], [-1, 0], [0, -1]], hits: [] } };
+  player.grid = placeShips(generateGrid(size), player.ships);
+
   return player;
 };
 
@@ -18510,9 +18546,10 @@ function generateShips() {
 
 function placeShips(grid, ships) {
   for (var i = 0; i < ships.length; i++) {
-    var flag = true;
     var row = void 0,
-        col = void 0;
+        col = void 0,
+        flag = true;
+    //randomly select ship positions & try ship placement
     while (flag) {
       row = Math.floor(Math.random() * grid.length);
       col = Math.floor(Math.random() * grid.length);
@@ -18522,8 +18559,8 @@ function placeShips(grid, ships) {
       } catch (er) {
         flag = true;
       }
-    }
-  }
+    } //end while
+  } // end for
   return grid;
 }
 
@@ -18532,23 +18569,30 @@ function placeShip(grid, ship, position) {
   var row = position[0],
       col = position[1];
   ship.positions = [];
+
+  //validate ship placement
   for (var i = 0; i < ship.length; i++) {
     if (grid[row][col] !== 0) throw 'invalid placement';
     row += orientation ? 1 : 0;
     col += orientation ? 0 : 1;
-    //    orientation ? (row+=1) : (col+=1); looks cleaner but lint hates it
   }
+  //reset starting positions
   row = position[0];
   col = position[1];
+
+  //places ships on grid if placement was valid
   for (var _i = 0; _i < ship.length; _i++) {
     grid[row][col] = ship;
     ship.positions.push({ row: row, col: col });
-    orientation ? row += 1 : col += 1;
+    row += orientation ? 1 : 0;
+    col += orientation ? 0 : 1;
   }
   return grid;
 }
 
+//handle game play
 var RESULTS = { miss: 'Miss', hit: 'Hit', repeat: 'Already Taken', sunk: 'Sunk', lost: 'Lost' };
+
 var attack = exports.attack = function torpedosAway(player, row, col) {
   var result = void 0,
       grid = player.grid,
@@ -18587,6 +18631,7 @@ var attack = exports.attack = function torpedosAway(player, row, col) {
 function sunk(grid, ship) {
   var i = 0,
       flag = true;
+
   while (i < ship.positions.length) {
     var row = ship.positions[i].row;
     var col = ship.positions[i].col;
@@ -18595,17 +18640,20 @@ function sunk(grid, ship) {
     }
     i++;
   }
+
   ship.sunk = true;
   return true;
 }
 
+//hunt randomly selects positions to hits
+//if it hits then enter target mode
 function hunt(player) {
-  console.log('hunt__________________');
   var row = void 0,
       col = void 0,
       size = player.grid.length;
   var parityOffset = void 0,
       i = 0;
+
   do {
     row = Math.floor(Math.random() * size);
     col = Math.floor(Math.random() * size);
@@ -18618,23 +18666,23 @@ function hunt(player) {
     }
 
     i++;
-    // console.log('hunt do while', row, col,i);
   } while (player.opponentGrid[row][col] !== 0);
 
   var result = attack(player, row, col);
-  // console.log('hunt attack',row,col,result);
 
   if (result === RESULTS.hit) {
     player.mode.hunt = false;
+    //reset queue and hits for target mode
     player.mode.target.queue = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     player.mode.target.hits = [[row, col]];
+
     player.opponentGrid[row][col] = 1;
   } else {
     player.opponentGrid[row][col] = 2;
   }
 
   return result;
-}
+} //end hunt
 
 function syncprint() {
   for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -18647,7 +18695,6 @@ function syncprint() {
 }
 
 function target(player) {
-  console.log('target');
   var targetGrid = player.opponentGrid;
   var size = player.grid.length;
   var tg = player.mode.target;
@@ -18657,7 +18704,6 @@ function target(player) {
   var retry = true;
 
   while (retry) {
-    syncprint('while', tg);
     if (tg.queue.length <= 0) {
       player.mode.hunt = true;
       hunt(player);
@@ -18667,14 +18713,12 @@ function target(player) {
     delta = tg.queue.shift();
     row = tg.hits[0][0] + delta[0];
     col = tg.hits[0][1] + delta[1];
-    console.log('prevalid', validsquare());
     if (validsquare(row, col, size)) {
-      console.log('valid');
       retry = false;
       return handleTargetResult(player, row, col, delta, attack(player, row, col));
     }
   } //end while
-}
+} //end target
 
 function validsquare(row, col, size) {
   var lowerbound = row > 0 && col > 0;
@@ -18687,18 +18731,18 @@ function handleTargetResult(player, row, col, delta, result) {
   var targetGrid = player.opponentGrid;
 
   switch (result) {
-    case 'Hit':
+    case RESULTS.hit:
       tg.hits.unshift([row, col]);
       tg.queue = [delta];
       break;
-    case 'Miss':
-    case 'Already Taken':
+    case RESULTS.miss:
+    case RESULTS.repeat:
       targetGrid[row][col] = 2;
       if (tg.queue.length <= 0) {
         player.mode.hunt = true;
       }
       break;
-    case 'Sunk':
+    case RESULTS.sunk:
       player.mode.hunt = true;
       break;
     default:
@@ -18788,7 +18832,6 @@ var Board = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      // console.log(this.props.attack);
       return _react2.default.createElement(
         'div',
         { className: 'board' },

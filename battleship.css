@@ -17,6 +17,7 @@ li {
 
 li:last-child { border-right: 1px solid grey; }
 ul:last-child li { border-bottom: 1px solid grey; }
+
 .open { background: lightblue; }
 .hit { background: red; }
 
@@ -40,15 +41,4 @@ ul:last-child li { border-bottom: 1px solid grey; }
   display: flex;
   justify-content: center;
   flex-direction: column;
-}
-
-.newgame {
-  position: absolute;
-  left: 50%;
-  top: 25%;
-  width: 200px;
-  height: 100px;
-  font-size: 2em;
-  z-index: 1;
-  margin-left: -100px; /*centers the element in relation to the left 50%*/
 }
