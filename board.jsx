@@ -28,15 +28,16 @@ class Board extends React.Component {
       return (
         <Square key={indexX}
           class={cssClassName}
-          x={indexX} y={indexY}
+          col={indexX} row={indexY}
           attack={this.props.attack} />
       );
     });
   }
 
   render(){
+    // console.log(this.props.attack);
     return(
-      <div>
+      <div className='board'>
         {this.generateBoard()}
       </div>
     );

@@ -5,7 +5,7 @@ class Square extends React.Component {
     return(
       <li
         className={this.props.class}
-        onClick={()=>this.props.attack(this.props.y, this.props.x)}>
+        onClick={()=>this.props.attack(this.props.row, this.props.col)}>
       </li>
     );
   }
